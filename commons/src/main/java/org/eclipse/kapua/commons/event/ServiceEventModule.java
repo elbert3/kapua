@@ -76,16 +76,18 @@ public abstract class ServiceEventModule implements ServiceModule {
         ServiceMap.registerServices(serviceEventModuleConfiguration.getInternalAddress(), new ArrayList<>(subscriberNames));
 
         // Start the House keeper
-        LOGGER.info("Starting service event module... start housekeeper");
-        houseKeeperScheduler = Executors.newScheduledThreadPool(1);
-        houseKeeperJob = new ServiceEventHousekeeper(
-                serviceEventModuleConfiguration.getEntityManagerFactory(),
-                eventbus,
-                serviceEventModuleConfiguration.getInternalAddress(),
-                new ArrayList<>(subscriberNames));
-        // Start time can be made random from 0 to 30 seconds
-        houseKeeperHandler = houseKeeperScheduler.scheduleAtFixedRate(houseKeeperJob, SCHEDULED_EXECUTION_TIME_WINDOW, SCHEDULED_EXECUTION_TIME_WINDOW, TimeUnit.SECONDS);
-        LOGGER.info("Starting service event module... DONE");
+        if(serviceEventModuleConfiguration.getEntityManagerFactory() != null) {
+            LOGGER.info("Starting service event module... start housekeeper");
+            houseKeeperScheduler = Executors.newScheduledThreadPool(1);
+            houseKeeperJob = new ServiceEventHousekeeper(
+                    serviceEventModuleConfiguration.getEntityManagerFactory(),
+                    eventbus,
+                    serviceEventModuleConfiguration.getInternalAddress(),
+                    new ArrayList<>(subscriberNames));
+            // Start time can be made random from 0 to 30 seconds
+            houseKeeperHandler = houseKeeperScheduler.scheduleAtFixedRate(houseKeeperJob, SCHEDULED_EXECUTION_TIME_WINDOW, SCHEDULED_EXECUTION_TIME_WINDOW, TimeUnit.SECONDS);
+            LOGGER.info("Starting service event module... DONE");
+        }
     }
 
     public String getEventAddress(String serviceName) {
