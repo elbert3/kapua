@@ -176,6 +176,7 @@ public class KapuaSecurityBrokerFilter extends BrokerFilter {
             registerStealingLinkManager();
         }
         super.start();
+        logger.info(">>> Security broker filter: calling start... DONE");
     }
 
     @Override
@@ -184,10 +185,11 @@ public class KapuaSecurityBrokerFilter extends BrokerFilter {
         logger.info(">>> Security broker filter: calling stop...");
         // stop the stealing link manager unregister
         if (stealingLinkEnabled) {
-            logger.info(">>> Security broker filter: calling start... Unregister stealing link manager");
+            logger.info(">>> Security broker filter: calling stop... Unregister stealing link manager");
             unregisterStealingLinkManager();
         }
         super.stop();
+        logger.info(">>> Security broker filter: calling stop... DONE");
     }
 
     /**
@@ -656,6 +658,7 @@ public class KapuaSecurityBrokerFilter extends BrokerFilter {
     // ------------------------------------------------------------------
 
     protected DefaultAuthorizationMap buildAuthorization(KapuaConnectionContext kcc, List<org.eclipse.kapua.broker.core.plugin.authentication.AuthorizationEntry> authorizationEntries) {
+        @SuppressWarnings("rawtypes")
         List<DestinationMapEntry> entries = new ArrayList<>();
         for (org.eclipse.kapua.broker.core.plugin.authentication.AuthorizationEntry entry : authorizationEntries) {
             entries.add(createAuthorizationEntry(kcc, entry.getAcl(), entry.getAddress()));
