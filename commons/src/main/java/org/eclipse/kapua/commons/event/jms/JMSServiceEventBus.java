@@ -75,6 +75,8 @@ public class JMSServiceEventBus implements ServiceEventBus, ServiceEventBusDrive
     private EventBusJMSConnectionBridge eventBusJMSConnectionBridge;
     private ServiceEventMarshaler eventBusMarshaler;
 
+    private boolean started;
+
     /**
      * Default constructor
      *
@@ -97,17 +99,25 @@ public class JMSServiceEventBus implements ServiceEventBus, ServiceEventBusDrive
      */
     @Override
     public void start() throws ServiceEventBusException {
-        try {
-            // initialize event bus marshaler
-            Class<?> messageSerializerClazz = Class.forName(MESSAGE_SERIALIZER);
-            if (ServiceEventMarshaler.class.isAssignableFrom(messageSerializerClazz)) {
-                eventBusMarshaler = (ServiceEventMarshaler) messageSerializerClazz.newInstance();
-            } else {
-                throw new ServiceEventBusException(String.format("Wrong message serializer Object type ('%s')!", messageSerializerClazz));
+        synchronized(this) {
+            if(!started) {
+                try {
+                    // initialize event bus marshaler
+                    LOGGER.info("Starting...");
+                    Class<?> messageSerializerClazz = Class.forName(MESSAGE_SERIALIZER);
+                    if (ServiceEventMarshaler.class.isAssignableFrom(messageSerializerClazz)) {
+                        eventBusMarshaler = (ServiceEventMarshaler) messageSerializerClazz.newInstance();
+                    } else {
+                        throw new ServiceEventBusException(String.format("Wrong message serializer Object type ('%s')!", messageSerializerClazz));
+                    }
+
+                    eventBusJMSConnectionBridge.start();
+                    started = true;
+                    LOGGER.info("Starting... DONE!");
+                } catch (JMSException | ClassNotFoundException | NamingException | InstantiationException | IllegalAccessException e) {
+                    throw new ServiceEventBusException(e);
+                }
             }
-            eventBusJMSConnectionBridge.start();
-        } catch (JMSException | ClassNotFoundException | NamingException | InstantiationException | IllegalAccessException e) {
-            throw new ServiceEventBusException(e);
         }
     }
 
@@ -141,6 +151,7 @@ public class JMSServiceEventBus implements ServiceEventBus, ServiceEventBusDrive
     @Override
     public void stop() throws ServiceEventBusException {
         eventBusJMSConnectionBridge.stop();
+        started = false;
     }
 
     @Override
