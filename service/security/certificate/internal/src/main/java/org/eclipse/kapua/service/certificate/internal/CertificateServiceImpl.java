@@ -159,7 +159,7 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public KapuaTocd getConfigMetadata() throws KapuaException {
+    public KapuaTocd getConfigMetadata(KapuaId scopeId) throws KapuaException {
         throw new UnsupportedOperationException();
     }
 
